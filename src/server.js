@@ -16,13 +16,16 @@ const wsServer = SocketIO(httpServer)
 
 wsServer.on("connection", (socket) => {
     socket["nickname"] = "Anon"
+    socket["roomName"] = ""
     socket.onAny((event) => {
         console.log(`Socket Event: ${event}`);
     });
-    socket.on("enter_room", (roomName, done) => {
+    socket.on("enter_room", (nickname, roomName, done) => {
         socket.join(roomName);
         done();
         socket.to(roomName).emit("welcome", socket.nickname);
+        // console.log(socket.nickname);
+        // console.log(socket.roomName);
     });
     socket.on("disconnecting", () => {
         socket.rooms.forEach(room =>  socket.to(room).emit("bye", socket.nickname));
@@ -32,6 +35,7 @@ wsServer.on("connection", (socket) => {
         done();
     })
     socket.on("nickname", nickname => (socket["nickname"] = nickname));
+    socket.on("roomName", roomName => (socket["roomName"] = roomName));
 });
 
 // const wss = new WebSocket.Server({server});
